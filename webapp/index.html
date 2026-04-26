@@ -4,7 +4,621 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NetChat Control Center</title>
-    <link rel="stylesheet" href="/app.css">
+    <style>
+        :root {
+            --bg-1: #07111a;
+            --bg-2: #0e2030;
+            --bg-3: #13324a;
+            --panel: rgba(9, 19, 29, 0.74);
+            --panel-soft: rgba(16, 34, 49, 0.62);
+            --panel-strong: rgba(8, 15, 22, 0.88);
+            --stroke: rgba(255, 255, 255, 0.08);
+            --stroke-strong: rgba(255, 255, 255, 0.14);
+            --text: #eef6fb;
+            --muted: #9bb3c7;
+            --accent: #58f0d0;
+            --accent-strong: #12b6a0;
+            --blue: #78b7ff;
+            --warm: #ffd089;
+            --danger: #ff8f73;
+            --shadow: 0 30px 100px rgba(0, 0, 0, 0.34);
+            --radius-xl: 32px;
+            --radius-lg: 24px;
+            --radius-md: 18px;
+            --radius-sm: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(88, 240, 208, 0.16), transparent 24%),
+                radial-gradient(circle at 88% 14%, rgba(120, 183, 255, 0.16), transparent 22%),
+                radial-gradient(circle at 50% 90%, rgba(255, 208, 137, 0.12), transparent 20%),
+                linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 48%, var(--bg-3) 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.9));
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: 290px 1fr;
+            min-height: 100vh;
+        }
+
+        .side-rail {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 28px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            background: linear-gradient(180deg, rgba(7, 16, 24, 0.94), rgba(8, 18, 28, 0.72));
+            border-right: 1px solid var(--stroke);
+            backdrop-filter: blur(20px);
+        }
+
+        .brand-block,
+        .status-card,
+        .masthead-copy,
+        .masthead-panel,
+        .section-card,
+        .feature-card,
+        .metric-card,
+        .room-card,
+        .call-card,
+        .notice-box,
+        .table-frame {
+            box-shadow: var(--shadow);
+        }
+
+        .brand-block h1,
+        .masthead h2,
+        .section-head h3,
+        .feature-head h4,
+        .metric-card strong,
+        .room-card h4,
+        .call-card h4 {
+            font-family: Georgia, "Times New Roman", serif;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-block h1 {
+            margin: 0;
+            font-size: 2.35rem;
+        }
+
+        .brand-copy,
+        .masthead-copy p:last-child,
+        .masthead-panel p,
+        .room-card p,
+        .call-card p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            color: var(--warm);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-size: 0.72rem;
+        }
+
+        .side-nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .side-nav a {
+            text-decoration: none;
+            color: var(--text);
+            padding: 13px 14px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .side-nav a:hover {
+            transform: translateX(4px);
+            border-color: var(--stroke-strong);
+            background: rgba(88, 240, 208, 0.1);
+        }
+
+        .status-card {
+            margin-top: auto;
+            display: grid;
+            grid-template-columns: 14px 1fr;
+            gap: 12px;
+            align-items: start;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid var(--stroke);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            margin-top: 5px;
+            background: linear-gradient(180deg, #6cf3cf, #18ba9a);
+            box-shadow: 0 0 18px rgba(108, 243, 207, 0.75);
+        }
+
+        .status-label {
+            margin: 0 0 6px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .status-value {
+            margin: 0;
+        }
+
+        .main-stage {
+            padding: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .masthead {
+            display: grid;
+            grid-template-columns: 1.4fr 340px;
+            gap: 18px;
+        }
+
+        .masthead-copy,
+        .masthead-panel,
+        .section-card {
+            border: 1px solid var(--stroke);
+            backdrop-filter: blur(22px);
+        }
+
+        .masthead-copy {
+            position: relative;
+            overflow: hidden;
+            padding: 34px;
+            border-radius: var(--radius-xl);
+            background:
+                radial-gradient(circle at top right, rgba(88, 240, 208, 0.18), transparent 26%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+        }
+
+        .masthead-copy::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: -80px;
+            top: -80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(120, 183, 255, 0.2), transparent 68%);
+        }
+
+        .masthead h2 {
+            margin: 0;
+            max-width: 12ch;
+            font-size: clamp(2.2rem, 4vw, 4rem);
+            line-height: 0.98;
+        }
+
+        .masthead-panel {
+            padding: 26px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, rgba(7, 17, 25, 0.92), rgba(11, 23, 35, 0.8));
+        }
+
+        .live-pill,
+        .pill,
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+        }
+
+        .live-pill {
+            padding: 8px 12px;
+            color: #08131a;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--warm), #fff0cb);
+        }
+
+        .section-card {
+            padding: 24px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, rgba(10, 22, 32, 0.92), rgba(10, 19, 28, 0.82));
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-head h3 {
+            margin: 0;
+            font-size: 1.72rem;
+        }
+
+        .stats-grid,
+        .operations-grid,
+        .room-grid,
+        .call-grid,
+        .infra-grid,
+        .two-column {
+            display: grid;
+            gap: 18px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+            padding: 22px;
+            border-radius: 22px;
+            border: 1px solid var(--stroke);
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)),
+                linear-gradient(180deg, rgba(18, 182, 160, 0.08), transparent);
+        }
+
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            right: -10px;
+            bottom: -26px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(88, 240, 208, 0.24), transparent 70%);
+        }
+
+        .metric-card strong {
+            display: block;
+            font-size: 2.1rem;
+            margin-bottom: 6px;
+        }
+
+        .metric-card span {
+            color: var(--muted);
+        }
+
+        .operations-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .feature-card {
+            padding: 20px;
+            border-radius: 22px;
+            border: 1px solid var(--stroke);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+        }
+
+        .feature-card-accent {
+            background:
+                radial-gradient(circle at top right, rgba(88, 240, 208, 0.15), transparent 26%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+        }
+
+        .feature-card-wide {
+            grid-column: span 2;
+        }
+
+        .feature-head {
+            margin-bottom: 14px;
+        }
+
+        .feature-head h4 {
+            margin: 10px 0 0;
+            font-size: 1.18rem;
+        }
+
+        .chip {
+            padding: 7px 11px;
+            background: rgba(88, 240, 208, 0.11);
+            border: 1px solid rgba(88, 240, 208, 0.16);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .chip-danger {
+            background: rgba(255, 143, 115, 0.12);
+            border-color: rgba(255, 143, 115, 0.18);
+            color: #ffb9a6;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        textarea,
+        input,
+        select,
+        button {
+            font: inherit;
+        }
+
+        textarea,
+        input,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(4, 13, 20, 0.56);
+            color: var(--text);
+            outline: none;
+        }
+
+        textarea::placeholder,
+        input::placeholder {
+            color: rgba(155, 179, 199, 0.72);
+        }
+
+        textarea:focus,
+        input:focus,
+        select:focus {
+            border-color: rgba(88, 240, 208, 0.35);
+            box-shadow: 0 0 0 4px rgba(88, 240, 208, 0.1);
+        }
+
+        .primary-button,
+        .secondary-button,
+        .mini {
+            cursor: pointer;
+            border: 0;
+            transition: transform 140ms ease, filter 140ms ease;
+        }
+
+        .primary-button,
+        .secondary-button {
+            padding: 13px 16px;
+            border-radius: 14px;
+        }
+
+        .primary-button {
+            color: #071117;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #adfff0);
+        }
+
+        .secondary-button {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--stroke-strong);
+        }
+
+        .primary-button:hover,
+        .secondary-button:hover,
+        .mini:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+        }
+
+        .notice-box {
+            margin-top: 16px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(88, 240, 208, 0.14);
+            background: linear-gradient(180deg, rgba(88, 240, 208, 0.11), rgba(255, 255, 255, 0.04));
+        }
+
+        .table-frame {
+            overflow: auto;
+            border-radius: 22px;
+            border: 1px solid var(--stroke);
+            background: rgba(4, 12, 19, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        thead th {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.78rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .pill {
+            padding: 6px 10px;
+            margin-right: 6px;
+            color: #b5f7ea;
+            background: rgba(88, 240, 208, 0.12);
+        }
+
+        .pill.warn {
+            color: #ffc0b0;
+            background: rgba(255, 143, 115, 0.14);
+        }
+
+        .inline-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mini {
+            padding: 8px 10px;
+            border-radius: 12px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .mini.ghost {
+            background: rgba(88, 240, 208, 0.14);
+        }
+
+        .room-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .room-card,
+        .call-card {
+            padding: 20px;
+            border-radius: 22px;
+            border: 1px solid var(--stroke);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+        }
+
+        .room-card h4,
+        .call-card h4 {
+            margin: 0 0 10px;
+            font-size: 1.15rem;
+        }
+
+        .message-list,
+        .feed-list {
+            display: grid;
+            gap: 10px;
+            max-height: 360px;
+            overflow: auto;
+        }
+
+        .feed-list-large {
+            max-height: 420px;
+        }
+
+        .message-item,
+        .audit-item {
+            padding: 13px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .message-item strong,
+        .audit-item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .call-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .two-column {
+            grid-template-columns: 0.95fr 1.05fr;
+        }
+
+        .infra-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(4, 13, 20, 0.5);
+            color: #c9d9e6;
+            line-height: 1.65;
+        }
+
+        @media (max-width: 1360px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .masthead,
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1120px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .side-rail {
+                position: static;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--stroke);
+            }
+
+            .operations-grid,
+            .infra-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card-wide {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .main-stage {
+                padding: 18px;
+            }
+
+            .side-rail,
+            .masthead-copy,
+            .masthead-panel,
+            .section-card {
+                padding: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="app-shell">
@@ -44,7 +658,7 @@
             </div>
             <div class="masthead-panel">
                 <span class="live-pill">Realtime dashboard</span>
-                <p>Designed for operator clarity, fast scanning, and safer intervention during live activity.</p>
+                <p>Built for a premium control-room feel with clear hierarchy, faster scanning, and calmer operator workflows.</p>
             </div>
         </header>
 
@@ -129,7 +743,7 @@
         </section>
 
         <section class="two-column">
-            <section id="calls" class="section-card compact-card">
+            <section id="calls" class="section-card">
                 <div class="section-head">
                     <div>
                         <p class="eyebrow">Realtime Media</p>
@@ -139,7 +753,7 @@
                 <div id="callsList" class="call-grid"></div>
             </section>
 
-            <section id="transfers" class="section-card compact-card">
+            <section id="transfers" class="section-card">
                 <div class="section-head">
                     <div>
                         <p class="eyebrow">Data Movement</p>
