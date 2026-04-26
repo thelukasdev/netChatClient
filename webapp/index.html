@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetChat Control Center</title>
+    <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="side-rail">
+        <div class="brand-block">
+            <p class="eyebrow">Lukas Pellny 2026</p>
+            <h1>NetChat</h1>
+            <p class="brand-copy">A live operations suite for communication, security, storage, calls, and data routing.</p>
+        </div>
+
+        <nav class="side-nav">
+            <a href="#overview">Overview</a>
+            <a href="#operations">Operations</a>
+            <a href="#users">Users</a>
+            <a href="#rooms">Rooms</a>
+            <a href="#calls">Calls</a>
+            <a href="#transfers">Transfers</a>
+            <a href="#audit">Audit</a>
+            <a href="#infrastructure">Infrastructure</a>
+        </nav>
+
+        <div class="status-card">
+            <div class="status-dot"></div>
+            <div>
+                <p class="status-label">Live status</p>
+                <p id="refreshStatus" class="status-value">Waiting for live data...</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-stage">
+        <header class="masthead">
+            <div class="masthead-copy">
+                <p class="eyebrow">Browser Administration</p>
+                <h2>Modern command center for a large realtime platform</h2>
+                <p>Monitor traffic, moderate users, supervise calls, inspect delivery logs, and coordinate storage systems from one clean browser surface.</p>
+            </div>
+            <div class="masthead-panel">
+                <span class="live-pill">Realtime dashboard</span>
+                <p>Designed for operator clarity, fast scanning, and safer intervention during live activity.</p>
+            </div>
+        </header>
+
+        <section id="overview" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Platform Pulse</p>
+                    <h3>Overview</h3>
+                </div>
+            </div>
+            <div id="overviewCards" class="stats-grid"></div>
+        </section>
+
+        <section id="operations" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Operator Actions</p>
+                    <h3>Admin Tools</h3>
+                </div>
+                <button id="snapshotButton" class="secondary-button">Create Encrypted Snapshot</button>
+            </div>
+
+            <div class="operations-grid">
+                <form class="feature-card feature-card-accent" id="announcementForm">
+                    <div class="feature-head">
+                        <span class="chip">Broadcast</span>
+                        <h4>Push a global announcement</h4>
+                    </div>
+                    <textarea name="message" rows="5" placeholder="Maintenance starts at 21:30. Voice services remain available."></textarea>
+                    <button type="submit" class="primary-button">Send announcement</button>
+                </form>
+
+                <form class="feature-card" id="moderationForm">
+                    <div class="feature-head">
+                        <span class="chip chip-danger">Moderation</span>
+                        <h4>Apply a direct action</h4>
+                    </div>
+                    <input type="text" name="username" placeholder="username" required>
+                    <select name="action">
+                        <option value="mute">Mute user</option>
+                        <option value="kick">Kick user</option>
+                        <option value="ban">Ban user</option>
+                    </select>
+                    <input type="number" name="seconds" min="1" value="60" placeholder="Mute duration in seconds">
+                    <button type="submit" class="primary-button">Execute action</button>
+                </form>
+            </div>
+
+            <div id="actionResult" class="notice-box">No admin action executed yet.</div>
+        </section>
+
+        <section id="users" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Identity Layer</p>
+                    <h3>Users</h3>
+                </div>
+            </div>
+            <div class="table-frame">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="rooms" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Messaging Fabric</p>
+                    <h3>Rooms</h3>
+                </div>
+            </div>
+            <div id="roomsGrid" class="room-grid"></div>
+        </section>
+
+        <section class="two-column">
+            <section id="calls" class="section-card compact-card">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">Realtime Media</p>
+                        <h3>Calls</h3>
+                    </div>
+                </div>
+                <div id="callsList" class="call-grid"></div>
+            </section>
+
+            <section id="transfers" class="section-card compact-card">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">Data Movement</p>
+                        <h3>Transfers</h3>
+                    </div>
+                </div>
+                <div id="transferFeed" class="feed-list"></div>
+            </section>
+        </section>
+
+        <section id="audit" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Security Timeline</p>
+                    <h3>Audit Trail</h3>
+                </div>
+            </div>
+            <div id="auditFeed" class="feed-list feed-list-large"></div>
+        </section>
+
+        <section id="infrastructure" class="section-card">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Systems</p>
+                    <h3>Infrastructure</h3>
+                </div>
+            </div>
+            <div class="infra-grid">
+                <article class="feature-card">
+                    <div class="feature-head">
+                        <span class="chip">Storage</span>
+                        <h4>Persistent layout</h4>
+                    </div>
+                    <pre id="storageBlock"></pre>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-head">
+                        <span class="chip">Routing</span>
+                        <h4>Proxy topology</h4>
+                    </div>
+                    <pre id="proxyBlock"></pre>
+                </article>
+                <article class="feature-card feature-card-wide">
+                    <div class="feature-head">
+                        <span class="chip">Integrations</span>
+                        <h4>External API matrix</h4>
+                    </div>
+                    <pre id="integrationBlock"></pre>
+                </article>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
